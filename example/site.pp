@@ -16,12 +16,12 @@ node default {
 
   # This assumes the puppet-manifest-core has been added to the core directory.
   import "core/*.pp"
-  include config::common
+  include data::common
 
   # We don't know if Hiera is ready yet.
   $common_config = $::hiera_ready ? {
     true    => hiera('hiera_common_config'),
-    default => $config::common::hiera_common_config,
+    default => $data::common::hiera_common_config,
   }
   notice "Hiera ready: ${::hiera_ready}"
   notice "Common configuration file: ${common_config}"

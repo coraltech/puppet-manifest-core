@@ -8,9 +8,9 @@
  * the server environment.  All of these configurations may be overridden
  * once Hiera exists and is properly configured.
  */
-class config::common {
+class data::common {
 
-  include config::private
+  include data::private
 
   #-----------------------------------------------------------------------------
 
@@ -21,7 +21,35 @@ class config::common {
   $git_home                  = '/var/git'
   $git_user                  = 'git'
   $git_group                 = 'git'
-  $git_init_password         = $config::private::git_init_password
+  $git_init_password         = $data::private::git_init_password
+
+  $config_repo               = 'config.git'
+  $config_path               = "${git_home}/${config_repo}"
+
+  $ruby_gems                 = [ 'git', 'hiera', 'hiera-json' ]
+
+  $facts                     = {
+    'environment'             => 'production',
+  }
+
+  $hiera_common_config       = "${config_path}/common.json"
+  $hiera_backends            = [
+    {
+      'type'                  => 'json',
+      'datadir'               => $config_path,
+    },
+    {
+      'type'                  => 'puppet',
+      'datasource'            => 'data',
+    },
+  ]
+  $hiera_hierarchy           = [
+    '%{hostname}',
+    '%{location}',
+    '%{environment}',
+    '%{server_type}',
+    'common'
+  ]
 
   $puppet_repo               = 'puppet.git'
   $puppet_path               = "${git_home}/${puppet_repo}"
@@ -30,29 +58,9 @@ class config::common {
   $puppet_manifest           = "${puppet_manifest_path}/${puppet_manifest_file}"
   $puppet_template_path      = "${puppet_path}/templates"
   $puppet_module_paths       = [ "${puppet_path}/modules" ]
-  $puppet_source             = $config::private::puppet_source
+  $puppet_source             = $data::private::puppet_source
   $puppet_revision           = 'master'
   $puppet_update_interval    = 30  # Minutes
   $puppet_update_environment = 'PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin'
   $puppet_update_command     = "puppet apply '${puppet_manifest}'"
-
-  $config_repo               = 'config.git'
-  $config_path               = "${git_home}/${config_repo}"
-
-  $hiera_common_config       = "${config_path}/common.json"
-  $hiera_hierarchy           = [ '%{hostname}', '%{location}', '%{environment}', 'common' ]
-  $hiera_backends            = [
-    {
-      'type'    => 'json',
-      'datadir' => $config_path,
-    },
-    {
-      'type'       => 'puppet',
-      'datasource' => 'config',
-    },
-  ]
-
-  $ruby_gems                 = [ 'git', 'hiera', 'hiera-json' ]
-  $gem_home                  = '/var/lib/gems/1.8'
-  $gem_path                  = flatten([ $gem_home, $puppet_module_paths ])
 }

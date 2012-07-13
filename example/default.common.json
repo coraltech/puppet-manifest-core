@@ -1,8 +1,30 @@
 {
-  "profiles" : [ ],
-  "locales" : [ "en_US.UTF-8 UTF-8" ],
+  "profiles" : [],
+  "facts" : {
+    "environment" : "production",
+    "location" : "dc1",
+    "server_type" : "base"
+  },
+  "config_source" : "",
+  "config_revision" : "",
+  "ssh_port" : "22",
+  "allow_root_login" : "false",
+  "allow_password_auth" : "false",
+  "permit_empty_passwords" : "false",
+  "sudo_permissions" : [
+    "%admin ALL=(ALL) NOPASSWD:ALL"
+  ],
   "allow_icmp" : "true",
-  "email_servers" : [],
+  "email_servers" : [
+    {
+      "host" : "<EMAIL SERVER HOSTNAME HERE>",
+      "user" : "<EMAIL ADDRESS HERE>",
+      "password" : "<EMAIL ACCOUNT PASSWORD HERE>"
+    }
+  ],
+  "git_root_email" : "<YOUR EMAIL ADDRESS HERE>",
+  "git_skel_email" : "<YOUR EMAIL ADDRESS HERE>",
+  "locales" : [ "en_US.UTF-8 UTF-8" ],  
   "user_umask" : "002",
   "admin_name" : "admin",
   "admin_group" : "admin",
@@ -13,23 +35,19 @@
   "admin_public_ssh_key" : "",
   "admin_private_ssh_key" : "",
   "admin_ssh_key_type" : "rsa",
-  "ssh_port" : "22",
-  "allow_root_login" : "false",
-  "allow_password_auth" : "false",
-  "permit_empty_passwords" : "false",
-  "sudo_permissions" : [
-    "%admin ALL=(ALL) NOPASSWD:ALL"
+  "hiera_hierarchy" : [
+    "%{hostname}",
+    "%{location}",
+    "%{environment}",
+    "%{server_type}",
+    "common"
   ],
-  "git_root_email" : "<YOUR EMAIL ADDRESS HERE>",
-  "git_skel_email" : "<YOUR EMAIL ADDRESS HERE>",
   "puppet_source" : "git://github.com/coraltech/puppet-lib.git",
   "puppet_revision" : "master",
   "puppet_update_interval" : "30",
   "reports" : "log,store,tagmail",
   "report_path" : "/var/log/puppet/reports",
   "report_emails" : {},
-  "config_source" : "",
-  "config_revision" : "",
   "haproxy_user" : "haproxy",
   "haproxy_group" : "haproxy",
   "haproxy_debug" : "false",
@@ -39,9 +57,9 @@
   "haproxy_default_retries" : "3",
   "haproxy_default_max_connections" : "1000",
   "haproxy_default_options" : {
-    "tcplog"      : [ ],
-    "dontlognull" : [ ],
-    "redispatch"  : [ ]
+    "tcplog"      : [],
+    "dontlognull" : [],
+    "redispatch"  : []
   },
   "haproxy_proxies" : {}
 }

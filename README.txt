@@ -2,7 +2,7 @@ Puppet and JSON configurations are aggregated from the following options based
 on the reference Hiera configuration below.
 
 This is just an example.  Real configurations can be changed through Hiera itself
-or the config::common class in common.pp.
+or the data::common class in common.pp.
 
 --------------------------------------------------------------------------------
 >> Hiera reference configuration:
@@ -16,13 +16,14 @@ or the config::common class in common.pp.
   - "%{hostname}"     # Individual hostname of server
   - "%{location}"     # Location, possibly data center
   - "%{environment}"  # development, staging, qa, production, etc...
+  - "%{server_type}"  # base, full, and other specialized configuration groups
   - common
 
 :json:
   :datadir: /var/git/config.git
 
 :puppet:
-  :datasource: config
+  :datasource: data
 
 
 --------------------------------------------------------------------------------
@@ -32,11 +33,13 @@ or the config::common class in common.pp.
 json> /var/git/config.git/{hostname}.json
 json> /var/git/config.git/{location}.json
 json> /var/git/config.git/{environment}.json
+json> /var/git/config.git/{server_type}.json
 json> /var/git/config.git/common.json
 
 # Public / Manual
-puppet> config::{hostname}
-puppet> config::{location}
-puppet> config::{environment}
-puppet> config::common
-puppet> {module}::config
+puppet> class data::{hostname}
+puppet> class data::{location}
+puppet> class data::{environment}
+puppet> class data::{server_type}
+puppet> class data::common
+puppet> class {module}::data
