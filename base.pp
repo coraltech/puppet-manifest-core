@@ -5,7 +5,7 @@ class base {
 
   #-----------------------------------------------------------------------------
 
-  $facts                           = hiera('facts', {})
+  $facts                           = hiera_hash('facts', {})
 
   $allow_icmp                      = hiera('allow_icmp', true)
   $ssh_port                        = hiera('ssh_port', 22)
