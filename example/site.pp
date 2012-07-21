@@ -18,25 +18,21 @@ node default {
   import "core/*.pp"
   include data::common
 
-  # We don't know if Hiera is ready yet.
-  $common_config = $::hiera_ready ? {
-    true    => hiera('hiera_common_config'),
-    default => $data::common::hiera_common_config,
-  }
-  notice "Hiera ready: ${::hiera_ready}"
-  notice "Common configuration file: ${common_config}"
+  $common_config = $data::common::os_hiera_common_config
 
-  if ! $::hiera_ready or ! exists($common_config) {
+  debug "Hiera ready: ${::hiera_ready}"
+  debug "Common configuration file: ${common_config}"
+
+  if ! ( $::hiera_ready and exists($common_config) ) {
     notice "Bootstrapping server"
 
     # We require Hiera and a valid configuration.
     include bootstrap
   }
   else {
-    import "capabilities/*.pp"
     import "profiles/*.pp"
 
     include base
-    hiera_include('profiles')
+    hiera_include('global_profiles')
   }
 }
