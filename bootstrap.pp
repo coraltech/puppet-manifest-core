@@ -12,15 +12,15 @@ class bootstrap {
   }
 
   $git_push_commands = [
-    $data::common::puppet_update_environment,
-    $data::common::puppet_update_command,
+    $data::common::os_puppet_update_environment,
+    $data::common::os_puppet_update_command,
   ]
 
   #-----------------------------------------------------------------------------
   # Required systems
 
   class { 'global':
-    packages => $data::common::global_packages,
+    packages => $data::common::os_global_packages,
     facts    => $data::common::global_facts,
   }
 
@@ -49,16 +49,16 @@ class bootstrap {
   }
 
   class { 'puppet':
-    manifest_file      => $data::common::puppet_manifest_file,
-    manifest_dir       => $data::common::puppet_manifest_dir,
-    template_dir       => $data::common::puppet_template_dir,
-    module_dirs        => $data::common::puppet_module_dirs,
-    update_environment => $data::common::puppet_update_environment,
-    update_command     => $data::common::puppet_update_command,
+    manifest_file      => $data::common::os_puppet_manifest_file,
+    manifest_dir       => $data::common::os_puppet_manifest_dir,
+    template_dir       => $data::common::os_puppet_template_dir,
+    module_dirs        => $data::common::os_puppet_module_dirs,
+    update_environment => $data::common::os_puppet_update_environment,
+    update_command     => $data::common::os_puppet_update_command,
   }
 
   class { 'hiera':
-    backends  => $data::common::hiera_backends,
+    backends  => $data::common::os_hiera_backends,
     hierarchy => $data::common::hiera_hierarchy,
   }
 
@@ -72,14 +72,14 @@ class bootstrap {
   #-----------------------------------------------------------------------------
   # Environment
 
-  git::repo { $data::common::base_puppet_repo:
+  git::repo { $data::common::os_base_puppet_repo:
     source        => $data::common::base_puppet_source,
     revision      => $data::common::base_puppet_revision,
     base          => 'false',
     push_commands => $git_push_commands,
   }
 
-  git::repo { $data::common::base_config_repo:
+  git::repo { $data::common::os_base_config_repo:
     base          => 'false',
     push_commands => $git_push_commands,
   }

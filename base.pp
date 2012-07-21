@@ -6,20 +6,20 @@ class base {
   }
 
   #-----------------------------------------------------------------------------
-  # Module configurations (existing)
+  # Configurations
 
-  $packages                        = $data::common::global_packages
+  $packages                        = $data::common::os_global_packages
 
   $git_group                       = hiera('git_group', 'git')
 
-  $puppet_manifest_dir             = $data::common::puppet_manifest_dir
-  $puppet_template_dir             = $data::common::puppet_template_dir
-  $puppet_module_dirs              = $data::common::puppet_module_dirs
+  $puppet_manifest_dir             = $data::common::os_puppet_manifest_dir
+  $puppet_template_dir             = $data::common::os_puppet_template_dir
+  $puppet_module_dirs              = $data::common::os_puppet_module_dirs
 
-  $puppet_update_environment       = $data::common::puppet_update_environment
-  $puppet_update_command           = $data::common::puppet_update_command
+  $puppet_update_environment       = $data::common::os_puppet_update_environment
+  $puppet_update_command           = $data::common::os_puppet_update_command
 
-  $hiera_backends                  = $data::common::hiera_backends
+  $hiera_backends                  = $data::common::os_hiera_backends
 
   $git_push_commands               = [
     $puppet_update_environment,
@@ -27,9 +27,6 @@ class base {
   ]
 
   $haproxy_proxies                 = hiera('haproxy_proxies', {})
-
-  #-----------------------------------------------------------------------------
-  # Profile configurations (new)
 
   $admin_name                      = hiera('base_admin_name', 'admin')
   $admin_email                     = hiera('base_admin_email', '')
@@ -39,11 +36,11 @@ class base {
   $admin_private_ssh_key           = hiera('base_admin_private_ssh_key', '')
   $admin_ssh_key_type              = hiera('base_admin_ssh_key_type', 'rsa')
 
-  $puppet_repo                     = hiera('base_puppet_repo', 'puppet.git')
+  $puppet_repo                     = $data::common::os_base_puppet_repo
   $puppet_source                   = hiera('base_puppet_source', '')
   $puppet_revision                 = hiera('base_puppet_revision', 'master')
 
-  $config_repo                     = hiera('base_config_repo', 'config.git')
+  $config_repo                     = $data::common::os_base_config_repo
   $config_source                   = hiera('base_config_source', '')
   $config_revision                 = hiera('base_config_revision', 'master')
 

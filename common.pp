@@ -5,8 +5,13 @@
  * in this manifest directory.
  *
  * These are the minimum server configurations needed to bootstrap Puppet and
- * the server environment.  All of these configurations may be overridden
- * once Hiera exists and is properly configured.
+ * the server environment.  Configurations that are not prefixed with "os_"
+ * may be overridden once Hiera exists and is properly configured.
+ *
+ * We separate configurations into two logical groupings; hiera configurable,
+ * and operating system specific.  Operating system specific configurations
+ * are mainly comprised of packages, directories and files, and other
+ * confgurations that are unsafe to dynamically change through Hiera over time.
  */
 class data::common {
 
@@ -17,9 +22,9 @@ class data::common {
 
   #-----------------------------------------------------------------------------
 
-  $global_packages           = {
-    'main'                    => {
-      'present'                 => [
+  $os_global_packages           = {
+    'main'                       => {
+      'present'                    => [
         'build-essential',
         'vim',
         'unzip',
@@ -27,34 +32,33 @@ class data::common {
     },
   }
 
-  $global_facts              = {
-    'environment'             => 'production',
-    'server_type'             => 'bootstrap',
+  $global_facts                 = {
+    'environment'                => 'production',
+    'server_type'                => 'bootstrap',
   }
 
-  $ssh_port                  = 22
-  $ssh_bootstrap_users       = [ 'root', $git::params::user ]
+  $ssh_port                     = 22
+  $ssh_bootstrap_users          = [ 'root', $git::params::user ]
 
-  $git_home                  = $git::params::os_home
-  $git_init_password         = $data::private::git_init_password
+  $os_git_home                  = $git::params::os_home
+  $git_init_password            = $data::private::git_init_password
 
-  $ruby_gems                 = [ 'git' ]
+  $ruby_gems                    = [ 'git' ]
 
-  $base_config_repo          = 'config.git'
-  $base_config_dir           = "${git_home}/${base_config_repo}"
+  $os_base_config_repo          = 'config.git'
+  $os_base_config_dir           = "${os_git_home}/${os_base_config_repo}"
 
-  #$hiera_common_config       = "${base_config_dir}/common.json"
-  $hiera_backends            = [
+  $os_hiera_backends            = [
     {
-      'type'                  => 'json',
-      'datadir'               => $base_config_dir,
+      'type'                     => 'json',
+      'datadir'                  => $os_base_config_dir,
     },
     {
-      'type'                  => 'puppet',
-      'datasource'            => 'data',
+      'type'                     => 'puppet',
+      'datasource'               => 'data',
     },
   ]
-  $hiera_hierarchy           = [
+  $hiera_hierarchy              = [
     '%{hostname}',
     '%{location}',
     '%{environment}',
@@ -62,16 +66,16 @@ class data::common {
     'common'
   ]
 
-  $base_puppet_repo          = 'puppet.git'
-  $base_puppet_dir           = "${git_home}/${base_puppet_repo}"
-  $base_puppet_source        = $data::private::puppet_source
-  $base_puppet_revision      = 'master'
+  $os_base_puppet_repo          = 'puppet.git'
+  $os_base_puppet_dir           = "${os_git_home}/${os_base_puppet_repo}"
+  $base_puppet_source           = $data::private::puppet_source
+  $base_puppet_revision         = 'master'
 
-  $puppet_manifest_file      = $puppet::params::manifest_file
-  $puppet_manifest_dir       = "${base_puppet_dir}/manifests"
-  $puppet_manifest           = "${puppet_manifest_dir}/${puppet_manifest_file}"
-  $puppet_template_dir       = "${base_puppet_dir}/templates"
-  $puppet_module_dirs        = [ "${base_puppet_dir}/modules" ]
-  $puppet_update_environment = $puppet::params::os_update_environment
-  $puppet_update_command     = "puppet apply '${puppet_manifest}'"
+  $os_puppet_manifest_file      = $puppet::params::manifest_file
+  $os_puppet_manifest_dir       = "${os_base_puppet_dir}/manifests"
+  $os_puppet_manifest           = "${os_puppet_manifest_dir}/${os_puppet_manifest_file}"
+  $os_puppet_template_dir       = "${os_base_puppet_dir}/templates"
+  $os_puppet_module_dirs        = [ "${os_base_puppet_dir}/modules" ]
+  $os_puppet_update_environment = $puppet::params::os_update_environment
+  $os_puppet_update_command     = "puppet apply '${os_puppet_manifest}'"
 }
