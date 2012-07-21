@@ -48,6 +48,7 @@ class data::common {
   $os_base_config_repo          = 'config.git'
   $os_base_config_dir           = "${os_git_home}/${os_base_config_repo}"
 
+  $os_hiera_common_config       = "${os_base_config_dir}/common.json"
   $os_hiera_backends            = [
     {
       'type'                     => 'json',
