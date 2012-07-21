@@ -12,31 +12,42 @@ class data::common {
 
   include data::private
 
+  include git::params
+  include puppet::params
+
   #-----------------------------------------------------------------------------
 
-  $ssh_port                  = 22
-
-  $bootstrap_users           = [ 'root', 'git' ]
-
-  $git_home                  = '/var/git'
-  $git_user                  = 'git'
-  $git_group                 = 'git'
-  $git_init_password         = $data::private::git_init_password
-
-  $config_repo               = 'config.git'
-  $config_path               = "${git_home}/${config_repo}"
-
-  $ruby_gems                 = [ 'git', 'hiera', 'hiera-json' ]
-
-  $facts                     = {
-    'environment'             => 'production',
+  $global_packages           = {
+    'main'                    => {
+      'present'                 => [
+        'build-essential',
+        'vim',
+        'unzip',
+      ],
+    },
   }
 
-  $hiera_common_config       = "${config_path}/common.json"
+  $global_facts              = {
+    'environment'             => 'production',
+    'server_type'             => 'bootstrap',
+  }
+
+  $ssh_port                  = 22
+  $ssh_bootstrap_users       = [ 'root', $git::params::user ]
+
+  $git_home                  = $git::params::os_home
+  $git_init_password         = $data::private::git_init_password
+
+  $ruby_gems                 = [ 'git' ]
+
+  $base_config_repo          = 'config.git'
+  $base_config_dir           = "${git_home}/${base_config_repo}"
+
+  #$hiera_common_config       = "${base_config_dir}/common.json"
   $hiera_backends            = [
     {
       'type'                  => 'json',
-      'datadir'               => $config_path,
+      'datadir'               => $base_config_dir,
     },
     {
       'type'                  => 'puppet',
@@ -51,16 +62,16 @@ class data::common {
     'common'
   ]
 
-  $puppet_repo               = 'puppet.git'
-  $puppet_path               = "${git_home}/${puppet_repo}"
-  $puppet_manifest_file      = 'site.pp'
-  $puppet_manifest_path      = "${puppet_path}/manifests"
-  $puppet_manifest           = "${puppet_manifest_path}/${puppet_manifest_file}"
-  $puppet_template_path      = "${puppet_path}/templates"
-  $puppet_module_paths       = [ "${puppet_path}/modules" ]
-  $puppet_source             = $data::private::puppet_source
-  $puppet_revision           = 'master'
-  $puppet_update_interval    = 30  # Minutes
-  $puppet_update_environment = 'PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin'
+  $base_puppet_repo          = 'puppet.git'
+  $base_puppet_dir           = "${git_home}/${base_puppet_repo}"
+  $base_puppet_source        = $data::private::puppet_source
+  $base_puppet_revision      = 'master'
+
+  $puppet_manifest_file      = $puppet::params::manifest_file
+  $puppet_manifest_dir       = "${base_puppet_dir}/manifests"
+  $puppet_manifest           = "${puppet_manifest_dir}/${puppet_manifest_file}"
+  $puppet_template_dir       = "${base_puppet_dir}/templates"
+  $puppet_module_dirs        = [ "${base_puppet_dir}/modules" ]
+  $puppet_update_environment = $puppet::params::os_update_environment
   $puppet_update_command     = "puppet apply '${puppet_manifest}'"
 }

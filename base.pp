@@ -1,271 +1,124 @@
 
 class base {
 
-  include data::common
+  if ! $::hiera_ready {
+    fail('Hiera is required to install and manage base profile.')
+  }
 
   #-----------------------------------------------------------------------------
+  # Module configurations (existing)
 
-  $facts                           = hiera_hash('facts', {})
+  $packages                        = $data::common::global_packages
 
-  $allow_icmp                      = hiera('allow_icmp', true)
-  $ssh_port                        = hiera('ssh_port', 22)
-  $allow_root_login                = hiera('allow_root_login', false)
-  $allow_password_auth             = hiera('allow_password_auth', false)
-  $permit_empty_passwords          = hiera('permit_empty_passwords', false)
-  $sudo_permissions                = hiera('sudo_permissions', [])
-  $locales                         = hiera('locales', [])
-  $user_umask                      = hiera('user_umask', '022')
+  $git_group                       = hiera('git_group', 'git')
 
-  $email_servers                   = hiera('email_servers', [])
+  $puppet_manifest_dir             = $data::common::puppet_manifest_dir
+  $puppet_template_dir             = $data::common::puppet_template_dir
+  $puppet_module_dirs              = $data::common::puppet_module_dirs
 
-  $admin_name                      = hiera('admin_name', 'admin')
-  $admin_group                     = hiera('admin_group', 'admin')
-  $admin_email                     = hiera('admin_email', '')
-  $admin_allowed_ssh_key           = hiera('admin_allowed_ssh_key')
-  $admin_allowed_ssh_key_type      = hiera('admin_allowed_ssh_key_type')
-  $admin_public_ssh_key            = hiera('admin_public_ssh_key', '')
-  $admin_private_ssh_key           = hiera('admin_private_ssh_key', '')
-  $admin_ssh_key_type              = hiera('admin_ssh_key_type', 'rsa')
-  $admin_editor                    = hiera('admin_editor', 'vim')
+  $puppet_update_environment       = $data::common::puppet_update_environment
+  $puppet_update_command           = $data::common::puppet_update_command
 
-  $git_home                        = hiera('git_home')
-  $git_user                        = hiera('git_user')
-  $git_group                       = hiera('git_group')
-  $git_root_email                  = hiera('git_root_email', '')
-  $git_skel_email                  = hiera('git_skel_email', '')
+  $hiera_backends                  = $data::common::hiera_backends
 
-  $ruby_gems                       = hiera('ruby_gems')
+  $git_push_commands               = [
+    $puppet_update_environment,
+    $puppet_update_command,
+  ]
 
-  $puppet_repo                     = hiera('puppet_repo')
-  $puppet_manifest_file            = hiera('puppet_manifest_file')
-  $puppet_manifest_path            = hiera('puppet_manifest_path')
-  $puppet_manifest                 = hiera('puppet_manifest')
-  $puppet_template_path            = hiera('puppet_template_path')
-  $puppet_module_paths             = hiera('puppet_module_paths')
-  $puppet_source                   = hiera('puppet_source')
-  $puppet_revision                 = hiera('puppet_revision')
-  $puppet_update_interval          = hiera('puppet_update_interval')
-  $puppet_update_environment       = hiera('puppet_update_environment')
-  $puppet_update_command           = hiera('puppet_update_command')
-
-  $hiera_hierarchy                 = hiera('hiera_hierarchy')
-  $hiera_backends                  = hiera('hiera_backends')
-
-  $config_repo                     = hiera('config_repo')
-  $config_source                   = hiera('config_source', '')
-  $config_revision                 = hiera('config_revision', '')
-
-  $haproxy_user                    = hiera('haproxy_user', 'haproxy')
-  $haproxy_group                   = hiera('haproxy_group', 'haproxy')
-  $haproxy_debug                   = hiera('haproxy_debug', false)
-  $haproxy_quiet                   = hiera('haproxy_quiet', false)
-  $haproxy_max_connections         = hiera('haproxy_max_connections', 5000)
-  $haproxy_default_mode            = hiera('haproxy_default_mode', 'http')
-  $haproxy_default_retries         = hiera('haproxy_default_retries', 3)
-  $haproxy_default_max_connections = hiera('haproxy_default_max_connections', 1000)
-  $haproxy_default_options         = hiera('haproxy_default_options', {})
   $haproxy_proxies                 = hiera('haproxy_proxies', {})
 
   #-----------------------------------------------------------------------------
-  # Basic systems
+  # Profile configurations (new)
 
-  class { 'global_lib':
-    facts => $facts,
+  $admin_name                      = hiera('base_admin_name', 'admin')
+  $admin_email                     = hiera('base_admin_email', '')
+  $admin_allowed_ssh_key           = hiera('base_admin_allowed_ssh_key')
+  $admin_allowed_ssh_key_type      = hiera('base_admin_allowed_ssh_key_type', 'rsa')
+  $admin_public_ssh_key            = hiera('base_admin_public_ssh_key', '')
+  $admin_private_ssh_key           = hiera('base_admin_private_ssh_key', '')
+  $admin_ssh_key_type              = hiera('base_admin_ssh_key_type', 'rsa')
+
+  $puppet_repo                     = hiera('base_puppet_repo', 'puppet.git')
+  $puppet_source                   = hiera('base_puppet_source', '')
+  $puppet_revision                 = hiera('base_puppet_revision', 'master')
+
+  $config_repo                     = hiera('base_config_repo', 'config.git')
+  $config_source                   = hiera('base_config_source', '')
+  $config_revision                 = hiera('base_config_revision', 'master')
+
+  #-----------------------------------------------------------------------------
+  # Required systems
+
+  class { 'global':
+    packages => $packages,
   }
 
-  class { 'ntp': autoupdate => false }
-  class { 'nullmailer': remotes => $email_servers }
-
+  include ntp
+  include nullmailer
   include xinetd
-
-  #-----------------------------------------------------------------------------
-  # Security
-
-  class { 'iptables': allow_icmp => $allow_icmp }
-  class { 'sudo': permissions => $sudo_permissions }
-  class { 'ssh':
-    port                   => $ssh_port,
-    allow_root_login       => $allow_root_login ? {
-      false                => false,
-      /(false|)/           => false,
-      default              => true,
-    },
-    allow_password_auth    => $allow_password_auth ? {
-      false                => false,
-      /(false|)/           => false,
-      default              => true,
-    },
-    permit_empty_passwords => $permit_empty_passwords ? {
-      false                => false,
-      /(false|)/           => false,
-      default              => true,
-    },
-    user_groups            => [ $admin_group, $git_group ],
-  }
-
-  #-----------------------------------------------------------------------------
-  # User environment
-
-  class { 'locales': locales => $locales }
-
-  class { 'users':
-    editor               => $admin_editor,
-    umask                => $user_umask,
-    root_public_ssh_key  => $admin_public_ssh_key ? {
-      ""                   => undef,
-      default              => $admin_public_ssh_key,
-    },
-    root_private_ssh_key => $admin_private_ssh_key ? {
-      ""                   => undef,
-      default              => $admin_private_ssh_key,
-    },
-    root_ssh_key_type    => $admin_ssh_key_type ? {
-      ""                   => undef,
-      default              => $admin_ssh_key_type,
-    },
-  }
-
-  users::user { $admin_name:
-    group                => $admin_group,
-    alt_groups           => [ $git_group ],
-    email                => $admin_email,
-    allowed_ssh_key      => $admin_allowed_ssh_key,
-    allowed_ssh_key_type => $admin_allowed_ssh_key_type,
-    public_ssh_key       => $admin_public_ssh_key ? {
-      ""                   => undef,
-      default              => $admin_public_ssh_key,
-    },
-    private_ssh_key      => $admin_private_ssh_key ? {
-      ""                   => undef,
-      default              => $admin_private_ssh_key,
-    },
-    ssh_key_type         => $admin_ssh_key_type ? {
-      ""                   => undef,
-      default              => $admin_ssh_key_type,
-    },
-  }
-
-  #-----------------------------------------------------------------------------
-  # Puppet
-
-  class { 'ruby':
-    ruby_gems => $ruby_gems,
-  }
+  include iptables
+  include sudo
+  include ssh
+  include locales
+  include users
+  include git
+  include ruby
 
   class { 'puppet':
-    manifest_file      => $puppet_manifest_file,
-    manifest_path      => $puppet_manifest_path,
-    template_path      => $puppet_template_path,
-    module_paths       => $puppet_module_paths,
-    update_interval    => $puppet_update_interval,
+    manifest_dir       => $puppet_manifest_dir,
+    template_dir       => $puppet_template_dir,
+    module_dirs        => $puppet_module_dirs,
     update_environment => $puppet_update_environment,
     update_command     => $puppet_update_command,
-    hiera_hierarchy    => $hiera_hierarchy,
-    hiera_backends     => $hiera_backends,
   }
 
-  #-----------------------------------------------------------------------------
-  # Git
-
-  class { 'git':
-    home                 => $git_home,
-    user                 => $git_user,
-    group                => $git_group,
-    allowed_ssh_key      => $admin_allowed_ssh_key,
-    allowed_ssh_key_type => $admin_allowed_ssh_key_type,
-    password             => undef, # We are now using SSH key based authentication.
-    root_email           => $git_root_email,
-    skel_email           => $git_skel_email,
-  }
-
-  #-----------------------------------------------------------------------------
-  # Configuration repositories
-
-  if  $puppet_update_environment and $puppet_update_command {
-    $push_commands = [
-      $puppet_update_environment,
-      $puppet_update_command,
-    ]
-  }
-  elsif $puppet_update_command {
-    $push_commands = [ $puppet_update_command ]
-  }
-  else {
-    $push_commands = []
+  class { 'hiera':
+    backends => $hiera_backends,
   }
 
   #---
 
-  git::repo { $puppet_repo:
-    home          => $git_home,
-    user          => $git_user,
-    group         => $git_group,
-    source        => $puppet_source ? {
-      ""      => undef,
-      default => $puppet_source,
-    },
-    revision      => $puppet_revision ? {
-      ""      => undef,
-      default => $puppet_revision,
-    },
-    base          => false,
-    push_commands => $push_commands,
-  }
-
-  git::repo { $config_repo:
-    home          => $git_home,
-    user          => $git_user,
-    group         => $git_group,
-    source        => $config_source ? {
-      ""            => undef,
-      default       => $config_source,
-    },
-    revision      => $config_revision ? {
-      ""            => undef,
-      default       => $config_revision,
-    },
-    base          => false,
-    push_commands => $push_commands,
-  }
-
-  #-----------------------------------------------------------------------------
-  # Load balancer
-
-  if ! empty($haproxy_proxies) {
-    class { 'haproxy':
-      user                    => $haproxy_user,
-      group                   => $haproxy_group,
-      debug                   => $haproxy_debug ? {
-        false                => false,
-        /(false|)/           => false,
-        default              => true,
-      },
-      quiet                   => $haproxy_quiet ? {
-        false                => false,
-        /(false|)/           => false,
-        default              => true,
-      },
-      max_connections         => $haproxy_max_connections,
-      default_mode            => $haproxy_default_mode,
-      default_retries         => $haproxy_default_retries,
-      default_max_connections => $haproxy_default_max_connections,
-      default_options         => $haproxy_default_options,
-      proxies                 => $haproxy_proxies,
-    }
-
-    #---
-
-    Class['sudo'] -> Class['haproxy']
-  }
-
-  #-----------------------------------------------------------------------------
-  # Execution order
-
-  Class['global_lib']
-  -> Class['ruby'] -> Class['puppet']
+  Class['global']
+  -> Class['ruby'] -> Class['puppet'] -> Class['hiera']
   -> Class['ntp']
   -> Class['nullmailer']
   -> Class['xinetd']
   -> Class['iptables'] -> Class['ssh'] -> Class['sudo']
   -> Class['locales'] -> Class['users'] -> Class['git']
+
+  #-----------------------------------------------------------------------------
+  # Optional systems
+
+  if ! empty($haproxy_proxies) {
+    include haproxy
+    Class['sudo'] -> Class['haproxy']
+  }
+
+  #-----------------------------------------------------------------------------
+  # Environment
+
+  users::user { $admin_name:
+    alt_groups           => [ $git_group ],
+    email                => $admin_email,
+    allowed_ssh_key      => $admin_allowed_ssh_key,
+    allowed_ssh_key_type => $admin_allowed_ssh_key_type,
+    public_ssh_key       => $admin_public_ssh_key,
+    private_ssh_key      => $admin_private_ssh_key,
+    ssh_key_type         => $admin_ssh_key_type,
+  }
+
+  git::repo { $puppet_repo:
+    source        => $puppet_source,
+    revision      => $puppet_revision,
+    base          => 'false',
+    push_commands => $git_push_commands,
+  }
+
+  git::repo { $config_repo:
+    source        => $config_source,
+    revision      => $config_revision,
+    base          => 'false',
+    push_commands => $git_push_commands,
+  }
 }
