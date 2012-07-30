@@ -73,10 +73,10 @@ class data::common {
   $base_puppet_revision         = 'master'
 
   $os_puppet_manifest_file      = $puppet::params::manifest_file
-  $os_puppet_manifest_dir       = "${os_base_puppet_dir}/manifests"
+  $os_puppet_manifest_dir       = $os_base_puppet_dir
   $os_puppet_manifest           = "${os_puppet_manifest_dir}/${os_puppet_manifest_file}"
   $os_puppet_template_dir       = "${os_base_puppet_dir}/templates"
-  $os_puppet_module_dirs        = [ "${os_base_puppet_dir}/modules" ]
+  $os_puppet_module_dirs        = [ "${os_base_puppet_dir}/core/modules" ]
   $os_puppet_update_environment = $puppet::params::os_update_environment
   $os_puppet_update_command     = "puppet apply '${os_puppet_manifest}'"
 
