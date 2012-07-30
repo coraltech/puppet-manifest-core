@@ -79,4 +79,9 @@ class data::common {
   $os_puppet_module_dirs        = [ "${os_base_puppet_dir}/modules" ]
   $os_puppet_update_environment = $puppet::params::os_update_environment
   $os_puppet_update_command     = "puppet apply '${os_puppet_manifest}'"
+
+  $os_git_push_commands         = [
+    $os_puppet_update_environment,
+    $os_puppet_update_command,
+  ]
 }

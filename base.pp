@@ -8,26 +8,6 @@ class base {
   #-----------------------------------------------------------------------------
   # Configurations
 
-  $packages                        = $data::common::os_global_packages
-
-  $git_group                       = hiera('git_group', 'git')
-
-  $puppet_manifest_dir             = $data::common::os_puppet_manifest_dir
-  $puppet_template_dir             = $data::common::os_puppet_template_dir
-  $puppet_module_dirs              = $data::common::os_puppet_module_dirs
-
-  $puppet_update_environment       = $data::common::os_puppet_update_environment
-  $puppet_update_command           = $data::common::os_puppet_update_command
-
-  $hiera_backends                  = $data::common::os_hiera_backends
-
-  $git_push_commands               = [
-    $puppet_update_environment,
-    $puppet_update_command,
-  ]
-
-  $haproxy_proxies                 = hiera('haproxy_proxies', {})
-
   $admin_name                      = hiera('base_admin_name', 'admin')
   $admin_email                     = hiera('base_admin_email', '')
   $admin_allowed_ssh_key           = hiera('base_admin_allowed_ssh_key')
@@ -36,11 +16,9 @@ class base {
   $admin_private_ssh_key           = hiera('base_admin_private_ssh_key', '')
   $admin_ssh_key_type              = hiera('base_admin_ssh_key_type', 'rsa')
 
-  $puppet_repo                     = $data::common::os_base_puppet_repo
   $puppet_source                   = hiera('base_puppet_source', '')
   $puppet_revision                 = hiera('base_puppet_revision', 'master')
 
-  $config_repo                     = $data::common::os_base_config_repo
   $config_source                   = hiera('base_config_source', '')
   $config_revision                 = hiera('base_config_revision', 'master')
 
@@ -48,7 +26,7 @@ class base {
   # Required systems
 
   class { 'global':
-    packages => $packages,
+    packages => $data::common::os_global_packages,
   }
 
   include ntp
@@ -63,15 +41,15 @@ class base {
   include ruby
 
   class { 'puppet':
-    manifest_dir       => $puppet_manifest_dir,
-    template_dir       => $puppet_template_dir,
-    module_dirs        => $puppet_module_dirs,
-    update_environment => $puppet_update_environment,
-    update_command     => $puppet_update_command,
+    manifest_dir       => $data::common::os_puppet_manifest_dir,
+    template_dir       => $data::common::os_puppet_template_dir,
+    module_dirs        => $data::common::os_puppet_module_dirs,
+    update_environment => $data::common::os_puppet_update_environment,
+    update_command     => $data::common::os_puppet_update_command,
   }
 
   class { 'hiera':
-    backends => $hiera_backends,
+    backends => $data::common::os_hiera_backends,
   }
 
   #---
@@ -87,7 +65,7 @@ class base {
   #-----------------------------------------------------------------------------
   # Optional systems
 
-  if ! empty($haproxy_proxies) {
+  if ! empty($haproxy::params::proxies) {
     include haproxy
     Class['sudo'] -> Class['haproxy']
   }
@@ -96,7 +74,7 @@ class base {
   # Environment
 
   users::user { $admin_name:
-    alt_groups           => [ $git_group ],
+    alt_groups           => [ $git::params::group ],
     email                => $admin_email,
     allowed_ssh_key      => $admin_allowed_ssh_key,
     allowed_ssh_key_type => $admin_allowed_ssh_key_type,
@@ -105,17 +83,17 @@ class base {
     ssh_key_type         => $admin_ssh_key_type,
   }
 
-  git::repo { $puppet_repo:
+  git::repo { $data::common::os_base_puppet_repo:
     source        => $puppet_source,
     revision      => $puppet_revision,
     base          => 'false',
-    push_commands => $git_push_commands,
+    push_commands => $data::common::os_git_push_commands,
   }
 
-  git::repo { $config_repo:
+  git::repo { $data::common::os_base_config_repo:
     source        => $config_source,
     revision      => $config_revision,
     base          => 'false',
-    push_commands => $git_push_commands,
+    push_commands => $data::common::os_git_push_commands,
   }
 }
