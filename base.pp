@@ -30,6 +30,7 @@ class base {
   }
 
   include ntp
+  include keepalived
   include nullmailer
   include xinetd
   include iptables
@@ -57,6 +58,7 @@ class base {
   Class['global']
   -> Class['ruby'] -> Class['puppet'] -> Class['hiera']
   -> Class['ntp']
+  -> Class['keepalived']
   -> Class['nullmailer']
   -> Class['xinetd']
   -> Class['iptables'] -> Class['ssh'] -> Class['sudo']
