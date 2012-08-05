@@ -22,16 +22,6 @@ class data::common {
 
   #-----------------------------------------------------------------------------
 
-  $os_global_packages           = {
-    'main'                       => {
-      'present'                    => [
-        'build-essential',
-        'vim',
-        'unzip',
-      ],
-    },
-  }
-
   $global_facts                 = {
     'environment'                => 'production',
     'server_type'                => 'bootstrap',
@@ -76,7 +66,7 @@ class data::common {
   $os_puppet_manifest_dir       = $os_base_puppet_dir
   $os_puppet_manifest           = "${os_puppet_manifest_dir}/${os_puppet_manifest_file}"
   $os_puppet_template_dir       = "${os_base_puppet_dir}/templates"
-  $os_puppet_module_dirs        = [ "${os_base_puppet_dir}/core/modules" ]
+  $os_puppet_module_dirs        = [ "${os_base_puppet_dir}/core/modules", "${os_base_puppet_dir}/modules" ]
   $os_puppet_update_environment = $puppet::params::os_update_environment
   $os_puppet_update_command     = "puppet apply '${os_puppet_manifest}'"
 
