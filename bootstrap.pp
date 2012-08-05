@@ -20,8 +20,7 @@ class bootstrap {
   # Required systems
 
   class { 'global':
-    packages => $data::common::os_global_packages,
-    facts    => $data::common::global_facts,
+    facts => $data::common::global_facts,
   }
 
   class { 'iptables':
@@ -65,9 +64,9 @@ class bootstrap {
   #---
 
   Class['global']
-  -> Class['ruby'] -> Class['puppet'] -> Class['hiera']
   -> Class['iptables'] -> Class['ssh']
   -> Class['users'] -> Class['git']
+  -> Class['ruby'] -> Class['puppet'] -> Class['hiera']
 
   #-----------------------------------------------------------------------------
   # Environment
