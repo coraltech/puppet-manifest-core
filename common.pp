@@ -33,7 +33,7 @@ class data::common {
   $os_git_home                  = $git::params::os_home
   $git_init_password            = $data::private::git_init_password
 
-  $ruby_gems                    = [ 'git' ]
+  $ruby_gems                    = []
 
   $os_base_config_repo          = 'config.git'
   $os_base_config_dir           = "${os_git_home}/${os_base_config_repo}"
