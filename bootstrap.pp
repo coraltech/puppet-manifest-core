@@ -79,7 +79,14 @@ class bootstrap {
   }
 
   git::repo { $data::common::os_base_config_repo:
+    revision      => '',
     base          => 'false',
     push_commands => $git_push_commands,
   }
+
+  #---
+
+  Class['hiera']
+  -> Git::Repo[$data::common::os_base_puppet_repo]
+  -> Git::Repo[$data::common::os_base_config_repo]
 }
