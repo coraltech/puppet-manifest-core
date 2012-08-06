@@ -30,6 +30,8 @@ class data::common {
   $ssh_port                     = 22
   $ssh_bootstrap_users          = [ 'root', $git::params::user ]
 
+  $vagrant_user                 = 'vagrant'
+
   $os_git_home                  = $git::params::os_home
   $git_init_password            = $data::private::git_init_password
 

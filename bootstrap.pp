@@ -5,7 +5,7 @@ class bootstrap {
   # Boostrap configurations
 
   if $::vagrant_exists {
-    $ssh_users = flatten([ $data::common::ssh_bootstrap_users, 'vagrant' ])
+    $ssh_users = flatten([ $data::common::ssh_bootstrap_users, $data::common::vagrant_user ])
   }
   else {
     $ssh_users = $data::common::ssh_bootstrap_users
@@ -70,6 +70,11 @@ class bootstrap {
 
   #-----------------------------------------------------------------------------
   # Environment
+
+  if $::vagrant_exists {
+    users::conf { $data::common::vagrant_user: }
+    Class['users'] -> Users::Conf[$data::common::vagrant_user]
+  }
 
   git::repo { $data::common::os_base_puppet_repo:
     source        => $data::common::base_puppet_source,
