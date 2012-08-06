@@ -2,7 +2,7 @@
 class base {
 
   if ! $::hiera_ready {
-    fail('Hiera is required to install and manage base profile.')
+    fail('Hiera is required to install and manage the base profile.')
   }
 
   #-----------------------------------------------------------------------------
@@ -25,21 +25,22 @@ class base {
   #-----------------------------------------------------------------------------
   # Required systems
 
-  class { 'global':
-    packages => $data::common::os_global_packages,
-  }
+  include global
+
+  include iptables
+  include ssh
+  include sudo
 
   include ntp
+  include locales
+  include users
+
+  include git
+  include ruby
+
   include keepalived
   include nullmailer
   include xinetd
-  include iptables
-  include sudo
-  include ssh
-  include locales
-  include users
-  include git
-  include ruby
 
   class { 'puppet':
     manifest_dir       => $data::common::os_puppet_manifest_dir,
@@ -56,24 +57,29 @@ class base {
   #---
 
   Class['global']
+  -> Class['iptables'] -> Class['ssh'] -> Class['sudo']
+  -> Class['locales'] -> Class['users'] -> Class['git']
   -> Class['ruby'] -> Class['puppet'] -> Class['hiera']
   -> Class['ntp']
   -> Class['keepalived']
   -> Class['nullmailer']
   -> Class['xinetd']
-  -> Class['iptables'] -> Class['ssh'] -> Class['sudo']
-  -> Class['locales'] -> Class['users'] -> Class['git']
 
   #-----------------------------------------------------------------------------
   # Optional systems
 
   if ! empty($haproxy::params::proxies) {
     include haproxy
-    Class['sudo'] -> Class['haproxy']
+    Class['xinetd'] -> Class['haproxy']
   }
 
   #-----------------------------------------------------------------------------
   # Environment
+
+  if $::vagrant_exists {
+    users::conf { $data::common::vagrant_user: }
+    Class['users'] -> Users::Conf[$data::common::vagrant_user]
+  }
 
   users::user { $admin_name:
     alt_groups           => [ $git::params::group ],
@@ -98,4 +104,11 @@ class base {
     base          => 'false',
     push_commands => $data::common::os_git_push_commands,
   }
+
+  #---
+
+  Class['xinetd']
+  -> Users::User[$admin_name]
+  -> Git::Repo[$data::common::os_base_puppet_repo]
+  -> Git::Repo[$data::common::os_base_config_repo]
 }
