@@ -58,9 +58,8 @@ class base {
 
   Class['global']
   -> Class['iptables'] -> Class['ssh'] -> Class['sudo']
-  -> Class['locales'] -> Class['users'] -> Class['git']
+  -> Class['ntp'] -> Class['locales'] -> Class['users'] -> Class['git']
   -> Class['ruby'] -> Class['puppet'] -> Class['hiera']
-  -> Class['ntp']
   -> Class['keepalived']
   -> Class['nullmailer']
   -> Class['xinetd']
