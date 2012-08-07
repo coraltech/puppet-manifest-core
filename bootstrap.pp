@@ -76,6 +76,8 @@ class bootstrap {
     Class['users'] -> Users::Conf[$data::common::vagrant_user]
   }
 
+  #---
+
   git::repo { $data::common::os_base_puppet_repo:
     source        => $data::common::base_puppet_source,
     revision      => $data::common::base_puppet_revision,
@@ -91,7 +93,7 @@ class bootstrap {
 
   #---
 
-  Class['hiera']
+  Class['hiera']  # Last of the required systems
   -> Git::Repo[$data::common::os_base_puppet_repo]
   -> Git::Repo[$data::common::os_base_config_repo]
 }
