@@ -30,6 +30,8 @@ class data::common {
   $ssh_port                     = 22
   $ssh_bootstrap_users          = [ 'root', $git::params::user ]
 
+  $sudo_permissions             = [ "git ALL=NOPASSWD:${puppet::params::os_bin}" ]
+
   $vagrant_user                 = 'vagrant'
 
   $os_git_home                  = $git::params::os_home
@@ -70,7 +72,7 @@ class data::common {
   $os_puppet_template_dir       = "${os_base_puppet_dir}/templates"
   $os_puppet_module_dirs        = [ "${os_base_puppet_dir}/core/modules", "${os_base_puppet_dir}/modules" ]
   $os_puppet_update_environment = $puppet::params::os_update_environment
-  $os_puppet_update_command     = "puppet apply '${os_puppet_manifest}'"
+  $os_puppet_update_command     = "sudo puppet apply '${os_puppet_manifest}'"
 
   $os_git_push_commands         = [
     $os_puppet_update_environment,
