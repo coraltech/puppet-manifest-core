@@ -8,19 +8,14 @@ class base {
   #-----------------------------------------------------------------------------
   # Configurations
 
-  $admin_name                      = hiera('base_admin_name', 'admin')
-  $admin_email                     = hiera('base_admin_email', '')
-  $admin_allowed_ssh_key           = hiera('base_admin_allowed_ssh_key')
-  $admin_allowed_ssh_key_type      = hiera('base_admin_allowed_ssh_key_type', 'rsa')
-  $admin_public_ssh_key            = hiera('base_admin_public_ssh_key', '')
-  $admin_private_ssh_key           = hiera('base_admin_private_ssh_key', '')
-  $admin_ssh_key_type              = hiera('base_admin_ssh_key_type', 'rsa')
+  $users                           = unique(hiera_array('base_users', []))
+  $repos                           = unique(hiera_array('base_repos', []))
 
   $puppet_source                   = hiera('base_puppet_source', '')
   $puppet_revision                 = hiera('base_puppet_revision', 'master')
 
   $config_source                   = hiera('base_config_source', '')
-  $config_revision                 = hiera('base_config_revision', 'master')
+  $config_revision                 = hiera('base_config_revision', '')
 
   #-----------------------------------------------------------------------------
   # Required systems
@@ -80,15 +75,11 @@ class base {
     Class['users'] -> Users::Conf[$data::common::vagrant_user]
   }
 
-  users::user { $admin_name:
-    alt_groups           => [ $git::params::group ],
-    email                => $admin_email,
-    allowed_ssh_key      => $admin_allowed_ssh_key,
-    allowed_ssh_key_type => $admin_allowed_ssh_key_type,
-    public_ssh_key       => $admin_public_ssh_key,
-    private_ssh_key      => $admin_private_ssh_key,
-    ssh_key_type         => $admin_ssh_key_type,
+  if ! empty($users) {
+    base::user { $users: }
   }
+
+  #---
 
   git::repo { $data::common::os_base_puppet_repo:
     source        => $puppet_source,
@@ -104,10 +95,65 @@ class base {
     push_commands => $data::common::os_git_push_commands,
   }
 
+  if ! empty($repos) {
+    base::repo { $repos: }
+  }
+
   #---
 
-  Class['xinetd']
-  -> Users::User[$admin_name]
+  Class['xinetd']  # Last of the required systems
+  -> Users::User <| |>
   -> Git::Repo[$data::common::os_base_puppet_repo]
   -> Git::Repo[$data::common::os_base_config_repo]
+  -> Git::Repo <| |>
+}
+
+#*******************************************************************************
+# Scalable resources
+#*******************************************************************************
+
+define base::user ( $user = $name ) {
+  @users::user { $user:
+    ensure               => hiera("base_user_${user}_ensure", $users::params::user_ensure),
+    alt_groups           => hiera("base_user_${user}_alt_groups", $users::params::user_alt_groups),
+    email                => hiera("base_user_${user}_email", $users::params::user_email),
+    comment              => hiera("base_user_${user}_comment", $users::params::user_comment),
+    allowed_ssh_key      => hiera("base_user_${user}_allowed_ssh_key", $users::params::user_allowed_ssh_key),
+    allowed_ssh_key_type => hiera("base_user_${user}_allowed_ssh_key_type", $users::params::user_allowed_ssh_key_type),
+    public_ssh_key       => hiera("base_user_${user}_public_ssh_key", $users::params::user_public_ssh_key),
+    private_ssh_key      => hiera("base_user_${user}_private_ssh_key", $users::params::user_private_ssh_key),
+    ssh_key_type         => hiera("base_user_${user}_ssh_key_type", $users::params::user_ssh_key_type),
+    password             => hiera("base_user_${user}_password", $users::params::user_password),
+    shell                => hiera("base_user_${user}_shell", $users::params::user_shell),
+    system               => hiera("base_user_${user}_system", $users::params::user_system),
+  }
+}
+
+#-------------------------------------------------------------------------------
+
+define base::repo ( $repo = $name ) {
+
+  $public = hiera("base_repo_${repo}_public", 'true')
+
+  if $public == 'true' {
+    $repo_real = "${repo}.git"
+  }
+  else {
+    $repo_real = $repo
+  }
+
+  #---
+
+  @git::repo { $repo_real:
+    user          => hiera("base_repo_${repo}_user", $git::params::user),
+    group         => hiera("base_repo_${repo}_group", $git::params::group),
+    home          => $public ? {
+      'false'       => '',
+      default       => $git::params::os_home,
+    },
+    source        => hiera("base_repo_${repo}_source", $git::params::source),
+    revision      => hiera("base_repo_${repo}_revision", $git::params::revision),
+    base          => hiera("base_repo_${repo}_base", $git::params::base),
+    push_commands => hiera("base_repo_${repo}_push_commands", $git::params::push_commands),
+  }
 }
