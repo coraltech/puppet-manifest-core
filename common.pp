@@ -27,12 +27,18 @@ class data::common {
     'server_type'                => 'bootstrap',
   }
 
+  $vagrant_user                 = 'vagrant'
+
   $ssh_port                     = 22
-  $ssh_bootstrap_users          = [ 'root', $git::params::user ]
+
+  if $::vagrant_exists {
+    $ssh_bootstrap_users        = [ 'root', $git::params::user , $vagrant_user ]
+  }
+  else {
+    $ssh_bootstrap_users        = [ 'root', $git::params::user ]
+  }
 
   $sudo_permissions             = [ "git ALL=NOPASSWD:${puppet::params::os_bin}" ]
-
-  $vagrant_user                 = 'vagrant'
 
   $os_git_home                  = $git::params::os_home
   $git_init_password            = $data::private::git_init_password
@@ -74,7 +80,7 @@ class data::common {
   $os_puppet_update_environment = $puppet::params::os_update_environment
   $os_puppet_update_command     = "sudo puppet apply '${os_puppet_manifest}'"
 
-  $os_git_push_commands         = [
+  $os_git_post_update_commands  = [
     $os_puppet_update_environment,
     $os_puppet_update_command,
   ]

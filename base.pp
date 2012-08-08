@@ -82,17 +82,17 @@ class base {
   #---
 
   git::repo { $data::common::os_base_puppet_repo:
-    source        => $puppet_source,
-    revision      => $puppet_revision,
-    base          => 'false',
-    push_commands => $data::common::os_git_push_commands,
+    source               => $puppet_source,
+    revision             => $puppet_revision,
+    base                 => 'false',
+    post_update_commands => $data::common::os_git_post_update_commands,
   }
 
   git::repo { $data::common::os_base_config_repo:
-    source        => $config_source,
-    revision      => $config_revision,
-    base          => 'false',
-    push_commands => $data::common::os_git_push_commands,
+    source               => $config_source,
+    revision             => $config_revision,
+    base                 => 'false',
+    post_update_commands => $data::common::os_git_post_update_commands,
   }
 
   if ! empty($repos) {
@@ -125,35 +125,16 @@ define base::user ( $user = $name ) {
     ssh_key_type         => hiera("base_user_${user}_ssh_key_type", $users::params::user_ssh_key_type),
     password             => hiera("base_user_${user}_password", $users::params::user_password),
     shell                => hiera("base_user_${user}_shell", $users::params::user_shell),
-    system               => hiera("base_user_${user}_system", $users::params::user_system),
   }
 }
 
 #-------------------------------------------------------------------------------
 
 define base::repo ( $repo = $name ) {
-
-  $public = hiera("base_repo_${repo}_public", 'true')
-
-  if $public == 'true' {
-    $repo_real = "${repo}.git"
-  }
-  else {
-    $repo_real = $repo
-  }
-
-  #---
-
-  @git::repo { $repo_real:
-    user          => hiera("base_repo_${repo}_user", $git::params::user),
-    group         => hiera("base_repo_${repo}_group", $git::params::group),
-    home          => $public ? {
-      'false'       => '',
-      default       => $git::params::os_home,
-    },
-    source        => hiera("base_repo_${repo}_source", $git::params::source),
-    revision      => hiera("base_repo_${repo}_revision", $git::params::revision),
-    base          => hiera("base_repo_${repo}_base", $git::params::base),
-    push_commands => hiera("base_repo_${repo}_push_commands", $git::params::push_commands),
+  @git::repo { "${repo}.git":
+    source               => hiera("base_repo_${repo}_source", $git::params::source),
+    revision             => hiera("base_repo_${repo}_revision", $git::params::revision),
+    base                 => hiera("base_repo_${repo}_base", $git::params::base),
+    post_update_commands => hiera("base_repo_${repo}_post_update_commands", $git::params::post_update_commands),
   }
 }

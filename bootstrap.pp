@@ -2,21 +2,6 @@
 class bootstrap {
 
   #-----------------------------------------------------------------------------
-  # Boostrap configurations
-
-  if $::vagrant_exists {
-    $ssh_users = flatten([ $data::common::ssh_bootstrap_users, $data::common::vagrant_user ])
-  }
-  else {
-    $ssh_users = $data::common::ssh_bootstrap_users
-  }
-
-  $git_push_commands = [
-    $data::common::os_puppet_update_environment,
-    $data::common::os_puppet_update_command,
-  ]
-
-  #-----------------------------------------------------------------------------
   # Required systems
 
   class { 'global':
@@ -33,7 +18,7 @@ class bootstrap {
     allow_root_login       => 'true',
     allow_password_auth    => 'true',
     permit_empty_passwords => 'true',
-    users                  => $ssh_users,
+    users                  => $data::common::ssh_bootstrap_users,
     user_groups            => [],
   }
 
@@ -79,16 +64,16 @@ class bootstrap {
   #---
 
   git::repo { $data::common::os_base_puppet_repo:
-    source        => $data::common::base_puppet_source,
-    revision      => $data::common::base_puppet_revision,
-    base          => 'false',
-    push_commands => $git_push_commands,
+    source               => $data::common::base_puppet_source,
+    revision             => $data::common::base_puppet_revision,
+    base                 => 'false',
+    post_update_commands => $data::common::os_git_post_update_commands,
   }
 
   git::repo { $data::common::os_base_config_repo:
-    revision      => '',
-    base          => 'false',
-    push_commands => $git_push_commands,
+    revision             => '',
+    base                 => 'false',
+    post_update_commands => $data::common::os_git_post_update_commands,
   }
 
   #---
