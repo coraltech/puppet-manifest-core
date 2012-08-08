@@ -100,7 +100,7 @@
   "git_source" : "",
   "git_revision" : "master",
   "git_base" : "false",
-  "git_push_commands" : [],
+  "git_post_update_commands" : [],
   "ruby_ensure" : "present",
   "ruby_rubygems_ensure" : "present",
   "ruby_gems" : [],
