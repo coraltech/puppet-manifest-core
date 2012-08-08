@@ -8,14 +8,14 @@ class base {
   #-----------------------------------------------------------------------------
   # Configurations
 
-  $users                           = unique(hiera_array('base_users', []))
-  $repos                           = unique(hiera_array('base_repos', []))
+  $users           = unique(hiera_array('base_users', []))
+  $repos           = unique(hiera_array('base_repos', []))
 
-  $puppet_source                   = hiera('base_puppet_source', '')
-  $puppet_revision                 = hiera('base_puppet_revision', 'master')
+  $puppet_source   = hiera('base_puppet_source', '')
+  $puppet_revision = hiera('base_puppet_revision', 'master')
 
-  $config_source                   = hiera('base_config_source', '')
-  $config_revision                 = hiera('base_config_revision', '')
+  $config_source   = hiera('base_config_source', '')
+  $config_revision = hiera('base_config_revision', '')
 
   #-----------------------------------------------------------------------------
   # Required systems
