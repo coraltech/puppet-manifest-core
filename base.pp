@@ -53,7 +53,9 @@ class base {
 
   Class['global']
   -> Class['iptables'] -> Class['ssh'] -> Class['sudo']
-  -> Class['ntp'] -> Class['locales'] -> Class['users'] -> Class['git']
+  -> Class['ntp']
+  -> Class['locales'] -> Class['users']
+  -> Class['git']
   -> Class['ruby'] -> Class['puppet'] -> Class['hiera']
   -> Class['keepalived']
   -> Class['nullmailer']
@@ -118,12 +120,12 @@ define base::user ( $user = $name ) {
     alt_groups           => hiera("base_user_${user}_alt_groups", $users::params::user_alt_groups),
     email                => hiera("base_user_${user}_email", $users::params::user_email),
     comment              => hiera("base_user_${user}_comment", $users::params::user_comment),
+    password             => hiera("base_user_${user}_password", $users::params::user_password),
     allowed_ssh_key      => hiera("base_user_${user}_allowed_ssh_key", $users::params::user_allowed_ssh_key),
     allowed_ssh_key_type => hiera("base_user_${user}_allowed_ssh_key_type", $users::params::user_allowed_ssh_key_type),
     public_ssh_key       => hiera("base_user_${user}_public_ssh_key", $users::params::user_public_ssh_key),
     private_ssh_key      => hiera("base_user_${user}_private_ssh_key", $users::params::user_private_ssh_key),
     ssh_key_type         => hiera("base_user_${user}_ssh_key_type", $users::params::user_ssh_key_type),
-    password             => hiera("base_user_${user}_password", $users::params::user_password),
     shell                => hiera("base_user_${user}_shell", $users::params::user_shell),
   }
 }
