@@ -5,6 +5,8 @@ class base {
     fail('Hiera is required to install and manage the base profile.')
   }
 
+  include haproxy::params
+
   #-----------------------------------------------------------------------------
   # Configurations
 
@@ -78,7 +80,9 @@ class base {
   }
 
   if ! empty($users) {
-    base::user { $users: }
+    base::user { $users:
+      require => Class['users'],
+    }
   }
 
   #---
@@ -98,16 +102,16 @@ class base {
   }
 
   if ! empty($repos) {
-    base::repo { $repos: }
+    base::repo { $repos:
+      require => Class['git'],
+    }
   }
 
   #---
 
   Class['xinetd']  # Last of the required systems
-  -> Users::User <| |>
   -> Git::Repo[$data::common::os_base_puppet_repo]
   -> Git::Repo[$data::common::os_base_config_repo]
-  -> Git::Repo <| |>
 }
 
 #*******************************************************************************
@@ -115,7 +119,7 @@ class base {
 #*******************************************************************************
 
 define base::user ( $user = $name ) {
-  @users::user { $user:
+  users::user { $user:
     ensure               => hiera("base_user_${user}_ensure", $users::params::user_ensure),
     alt_groups           => hiera("base_user_${user}_alt_groups", $users::params::user_alt_groups),
     email                => hiera("base_user_${user}_email", $users::params::user_email),
@@ -133,7 +137,7 @@ define base::user ( $user = $name ) {
 #-------------------------------------------------------------------------------
 
 define base::repo ( $repo = $name ) {
-  @git::repo { "${repo}.git":
+  git::repo { "${repo}.git":
     source               => hiera("base_repo_${repo}_source", $git::params::source),
     revision             => hiera("base_repo_${repo}_revision", $git::params::revision),
     base                 => hiera("base_repo_${repo}_base", $git::params::base),
