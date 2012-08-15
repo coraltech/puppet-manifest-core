@@ -18,9 +18,11 @@ node default {
   import "core/*.pp"
   include data::common
 
-  if ! ( $::hiera_ready and exists($data::common::os_hiera_common_config) ) {
+  if ! ( $::hiera_ready and exists(global_param('hiera_common_config')) ) {
+    $config_address = global_param('base_config_address')
+
     notice "Bootstrapping server"
-    notice "Push configurations to: git@${::ipaddress}:config.git"
+    notice "Push configurations to: ${config_address}"
 
     # We require Hiera and a valid configuration.
     include bootstrap
@@ -30,8 +32,7 @@ node default {
 
     include base
 
-    $profiles = hiera('profiles', [])
-    if ! empty($profiles) {
+    if ! empty(hiera('profiles', [])) {
       hiera_include('profiles')
     }
   }

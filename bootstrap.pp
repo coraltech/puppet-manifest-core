@@ -29,20 +29,20 @@ class bootstrap {
   }
 
   class { 'ruby':
-    ruby_gems => $data::common::ruby_gems,
+    gems => $data::common::ruby_gems,
   }
 
   class { 'puppet':
-    manifest_file      => $data::common::os_puppet_manifest_file,
-    manifest_dir       => $data::common::os_puppet_manifest_dir,
-    template_dir       => $data::common::os_puppet_template_dir,
-    module_dirs        => $data::common::os_puppet_module_dirs,
-    update_environment => $data::common::os_puppet_update_environment,
-    update_command     => $data::common::os_puppet_update_command,
+    manifest_file      => $data::common::puppet_manifest_file,
+    manifest_dir       => $data::common::puppet_manifest_dir,
+    template_dir       => $data::common::puppet_template_dir,
+    module_dirs        => $data::common::puppet_module_dirs,
+    update_environment => $data::common::puppet_update_environment,
+    update_command     => $data::common::puppet_update_command,
   }
 
   class { 'hiera':
-    backends  => $data::common::os_hiera_backends,
+    backends  => $data::common::hiera_backends,
     hierarchy => $data::common::hiera_hierarchy,
   }
 
@@ -63,22 +63,22 @@ class bootstrap {
 
   #---
 
-  git::repo { $data::common::os_base_puppet_repo:
+  git::repo { $data::common::base_puppet_repo:
     source               => $data::common::base_puppet_source,
     revision             => $data::common::base_puppet_revision,
     base                 => 'false',
-    post_update_commands => $data::common::os_git_post_update_commands,
+    post_update_commands => $data::common::base_post_update_commands,
   }
 
-  git::repo { $data::common::os_base_config_repo:
+  git::repo { $data::common::base_config_repo:
     revision             => '',
     base                 => 'false',
-    post_update_commands => $data::common::os_git_post_update_commands,
+    post_update_commands => $data::common::base_post_update_commands,
   }
 
   #---
 
   Class['hiera']  # Last of the required systems
-  -> Git::Repo[$data::common::os_base_puppet_repo]
-  -> Git::Repo[$data::common::os_base_config_repo]
+  -> Git::Repo[$data::common::base_puppet_repo]
+  -> Git::Repo[$data::common::base_config_repo]
 }

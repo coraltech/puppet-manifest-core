@@ -5,19 +5,23 @@ class base {
     fail('Hiera is required to install and manage the base profile.')
   }
 
-  include haproxy::params
-
   #-----------------------------------------------------------------------------
   # Configurations
 
-  $users           = unique(hiera_array('base_users', []))
-  $repos           = unique(hiera_array('base_repos', []))
+  $users                = global_array('base_users', [])
+  $repos                = global_array('base_repos', [])
 
-  $puppet_source   = hiera('base_puppet_source', '')
-  $puppet_revision = hiera('base_puppet_revision', 'master')
+  $post_update_commands = global_array('base_post_update_commands')
 
-  $config_source   = hiera('base_config_source', '')
-  $config_revision = hiera('base_config_revision', '')
+  $puppet_repo          = global_param('base_puppet_repo')
+  $puppet_source        = global_param('base_puppet_source')
+  $puppet_revision      = global_param('base_puppet_revision')
+
+  $config_repo          = global_param('base_config_repo')
+  $config_source        = global_param('base_config_source')
+  $config_revision      = global_param('base_config_revision')
+
+  $vagrant_user         = global_param('vagrant_user')
 
   #-----------------------------------------------------------------------------
   # Required systems
@@ -39,17 +43,8 @@ class base {
   include nullmailer
   include xinetd
 
-  class { 'puppet':
-    manifest_dir       => $data::common::os_puppet_manifest_dir,
-    template_dir       => $data::common::os_puppet_template_dir,
-    module_dirs        => $data::common::os_puppet_module_dirs,
-    update_environment => $data::common::os_puppet_update_environment,
-    update_command     => $data::common::os_puppet_update_command,
-  }
-
-  class { 'hiera':
-    backends => $data::common::os_hiera_backends,
-  }
+  include puppet
+  include hiera
 
   #---
 
@@ -66,6 +61,8 @@ class base {
   #-----------------------------------------------------------------------------
   # Optional systems
 
+  include haproxy::params
+
   if ! empty($haproxy::params::proxies) {
     include haproxy
     Class['xinetd'] -> Class['haproxy']
@@ -75,8 +72,8 @@ class base {
   # Environment
 
   if $::vagrant_exists {
-    users::conf { $data::common::vagrant_user: }
-    Class['users'] -> Users::Conf[$data::common::vagrant_user]
+    users::conf { $vagrant_user: }
+    Class['users'] -> Users::Conf[$vagrant_user]
   }
 
   if ! empty($users) {
@@ -87,18 +84,18 @@ class base {
 
   #---
 
-  git::repo { $data::common::os_base_puppet_repo:
+  git::repo { $puppet_repo:
     source               => $puppet_source,
     revision             => $puppet_revision,
     base                 => 'false',
-    post_update_commands => $data::common::os_git_post_update_commands,
+    post_update_commands => $post_update_commands,
   }
 
-  git::repo { $data::common::os_base_config_repo:
+  git::repo { $config_repo:
     source               => $config_source,
     revision             => $config_revision,
     base                 => 'false',
-    post_update_commands => $data::common::os_git_post_update_commands,
+    post_update_commands => $post_update_commands,
   }
 
   if ! empty($repos) {
@@ -110,8 +107,8 @@ class base {
   #---
 
   Class['xinetd']  # Last of the required systems
-  -> Git::Repo[$data::common::os_base_puppet_repo]
-  -> Git::Repo[$data::common::os_base_config_repo]
+  -> Git::Repo[$puppet_repo]
+  -> Git::Repo[$config_repo]
 }
 
 #*******************************************************************************
@@ -120,17 +117,17 @@ class base {
 
 define base::user ( $user = $name ) {
   users::user { $user:
-    ensure               => hiera("base_user_${user}_ensure", $users::params::user_ensure),
-    alt_groups           => hiera("base_user_${user}_alt_groups", $users::params::user_alt_groups),
-    email                => hiera("base_user_${user}_email", $users::params::user_email),
-    comment              => hiera("base_user_${user}_comment", $users::params::user_comment),
-    password             => hiera("base_user_${user}_password", $users::params::user_password),
-    allowed_ssh_key      => hiera("base_user_${user}_allowed_ssh_key", $users::params::user_allowed_ssh_key),
-    allowed_ssh_key_type => hiera("base_user_${user}_allowed_ssh_key_type", $users::params::user_allowed_ssh_key_type),
-    public_ssh_key       => hiera("base_user_${user}_public_ssh_key", $users::params::user_public_ssh_key),
-    private_ssh_key      => hiera("base_user_${user}_private_ssh_key", $users::params::user_private_ssh_key),
-    ssh_key_type         => hiera("base_user_${user}_ssh_key_type", $users::params::user_ssh_key_type),
-    shell                => hiera("base_user_${user}_shell", $users::params::user_shell),
+    ensure               => global_param("base_user_${user}_ensure", $users::params::user_ensure),
+    alt_groups           => global_param("base_user_${user}_alt_groups", $users::params::user_alt_groups),
+    email                => global_param("base_user_${user}_email", $users::params::user_email),
+    comment              => global_param("base_user_${user}_comment", $users::params::user_comment),
+    password             => global_param("base_user_${user}_password", $users::params::user_password),
+    allowed_ssh_key      => global_param("base_user_${user}_allowed_ssh_key", $users::params::user_allowed_ssh_key),
+    allowed_ssh_key_type => global_param("base_user_${user}_allowed_ssh_key_type", $users::params::user_allowed_ssh_key_type),
+    public_ssh_key       => global_param("base_user_${user}_public_ssh_key", $users::params::user_public_ssh_key),
+    private_ssh_key      => global_param("base_user_${user}_private_ssh_key", $users::params::user_private_ssh_key),
+    ssh_key_type         => global_param("base_user_${user}_ssh_key_type", $users::params::user_ssh_key_type),
+    shell                => global_param("base_user_${user}_shell", $users::params::user_shell),
   }
 }
 
@@ -138,9 +135,9 @@ define base::user ( $user = $name ) {
 
 define base::repo ( $repo = $name ) {
   git::repo { "${repo}.git":
-    source               => hiera("base_repo_${repo}_source", $git::params::source),
-    revision             => hiera("base_repo_${repo}_revision", $git::params::revision),
-    base                 => hiera("base_repo_${repo}_base", $git::params::base),
-    post_update_commands => hiera("base_repo_${repo}_post_update_commands", $git::params::post_update_commands),
+    source               => global_param("base_repo_${repo}_source", $git::params::source),
+    revision             => global_param("base_repo_${repo}_revision", $git::params::revision),
+    base                 => global_param("base_repo_${repo}_base", $git::params::base),
+    post_update_commands => global_param("base_repo_${repo}_post_update_commands", $git::params::post_update_commands),
   }
 }
