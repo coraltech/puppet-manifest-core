@@ -1,3 +1,58 @@
-[submodule "modules"]
-	path = modules
-	url = git://github.com/coraltech/puppet-modules.git
+[submodule "firewall"]
+  path = firewall
+  url = git://github.com/coraltech/puppet-firewall.git
+[submodule "ntp"]
+  path = ntp
+  url = git://github.com/coraltech/puppet-ntp.git
+[submodule "locales"]
+  path = locales
+  url = git://github.com/coraltech/puppet-locales.git
+[submodule "global"]
+  path = global
+  url = git://github.com/coraltech/puppet-global.git
+[submodule "puppet"]
+  path = puppet
+  url = git://github.com/coraltech/puppet-puppet.git
+[submodule "iptables"]
+  path = iptables
+  url = git://github.com/coraltech/puppet-iptables.git
+[submodule "ssh"]
+  path = ssh
+  url = git://github.com/coraltech/puppet-ssh.git
+[submodule "sudo"]
+  path = sudo
+  url = git://github.com/coraltech/puppet-sudo.git
+[submodule "users"]
+  path = users
+  url = git://github.com/coraltech/puppet-users.git
+[submodule "git"]
+  path = git
+  url = git://github.com/coraltech/puppet-git.git
+[submodule "vcsrepo"]
+  path = vcsrepo
+  url = git://github.com/coraltech/puppet-vcsrepo.git
+[submodule "stdlib"]
+  path = stdlib
+  url = git://github.com/coraltech/puppet-stdlib.git
+[submodule "apt"]
+  path = apt
+  url = git://github.com/coraltech/puppet-apt.git
+[submodule "haproxy"]
+  path = haproxy
+  url = git://github.com/coraltech/puppet-haproxy.git
+[submodule "hiera"]
+  path = hiera
+  url = git://github.com/coraltech/puppet-hiera.git
+[submodule "nullmailer"]
+  path = nullmailer
+  url = git://github.com/coraltech/puppet-nullmailer.git
+[submodule "xinetd"]
+  path = xinetd
+  url = git://github.com/coraltech/puppet-xinetd.git
+[submodule "ruby"]
+  path = ruby
+  url = git://github.com/coraltech/puppet-ruby.git
+[submodule "keepalived"]
+  path = keepalived
+  url = git://github.com/coraltech/puppet-keepalived.git
+
