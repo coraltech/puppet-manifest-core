@@ -18,7 +18,7 @@ node default {
   import "core/*.pp"
   include data::common
 
-  if ! ( $::hiera_ready and exists(global_param('hiera_common_config')) ) {
+  if ! ( config_initialized and exists(global_param('hiera_common_config')) ) {
     $config_address = global_param('base_config_address')
 
     notice "Bootstrapping server"
@@ -31,9 +31,6 @@ node default {
     import "profiles/*.pp"
 
     include base
-
-    if ! empty(hiera('profiles', [])) {
-      hiera_include('profiles')
-    }
+    global_include('profiles')
   }
 }
