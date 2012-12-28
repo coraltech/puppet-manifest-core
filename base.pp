@@ -1,8 +1,8 @@
 
 class base {
 
-  if ! $::hiera_ready {
-    fail('Hiera is required to install and manage the base profile.')
+  if ! config_initialized {
+    fail('Configuration system (Hiera) is required to install and manage the base profile.')
   }
 
   #-----------------------------------------------------------------------------
