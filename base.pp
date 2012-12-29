@@ -40,10 +40,12 @@ class base {
   include ruby
 
   class { 'puppet':
-    manifest_file => $data::common::puppet_manifest_file,
-    manifest_dir  => $data::common::puppet_manifest_dir,
-    template_dir  => $data::common::puppet_template_dir,
-    module_dirs   => $data::common::puppet_module_dirs,
+    manifest_file      => $data::common::puppet_manifest_file,
+    manifest_dir       => $data::common::puppet_manifest_dir,
+    template_dir       => $data::common::puppet_template_dir,
+    module_dirs        => $data::common::puppet_module_dirs,
+    update_environment => $data::common::puppet_update_environment,
+    update_command     => $data::common::puppet_update_command,
   }
 
   class { 'hiera':
