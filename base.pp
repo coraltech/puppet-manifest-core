@@ -39,12 +39,20 @@ class base {
   include git
   include ruby
 
+  class { 'puppet':
+    manifest_file => $data::common::puppet_manifest_file,
+    manifest_dir  => $data::common::puppet_manifest_dir,
+    template_dir  => $data::common::puppet_template_dir,
+    module_dirs   => $data::common::puppet_module_dirs,
+  }
+
+  class { 'hiera':
+    backends  => $data::common::hiera_backends,
+  }
+
   include keepalived
   include nullmailer
   include xinetd
-
-  include puppet
-  include hiera
 
   #---
 
