@@ -38,7 +38,7 @@ class data::common {
 
   $base_config_repo             = 'config.git'
   $base_config_dir              = "${git_home}/${base_config_repo}"
-  $base_config_address          = "git@${::ipaddress}:${base_config_repo}"
+  $base_config_address          = "git@${::hostname}:${base_config_repo}"
 
   $hiera_common_config          = "${base_config_dir}/common.json"
   $hiera_backends               = [
@@ -52,10 +52,10 @@ class data::common {
     },
   ]
   $hiera_hierarchy              = [
-    '%{hostname}',
-    '%{location}',
-    '%{environment}',
-    '%{server_type}',
+    '%{::hostname}',
+    '%{::location}',
+    '%{::environment}',
+    '%{::server_type}',
     'common'
   ]
 
