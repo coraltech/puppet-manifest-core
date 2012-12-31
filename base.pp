@@ -39,6 +39,8 @@ class base {
   include git
   include ruby
 
+  include xinetd
+
   class { 'puppet':
     manifest_file      => $data::common::puppet_manifest_file,
     manifest_dir       => $data::common::puppet_manifest_dir,
@@ -52,9 +54,7 @@ class base {
     backends  => $data::common::hiera_backends,
   }
 
-  include keepalived
-  include nullmailer
-  include xinetd
+  global_include('base_classes')
 
   #---
 
@@ -64,19 +64,7 @@ class base {
   -> Class['locales'] -> Class['users']
   -> Class['git']
   -> Class['ruby'] -> Class['puppet'] -> Class['hiera']
-  -> Class['keepalived']
-  -> Class['nullmailer']
   -> Class['xinetd']
-
-  #-----------------------------------------------------------------------------
-  # Optional systems
-
-  include haproxy::params
-
-  if ! empty($haproxy::params::proxies) {
-    include haproxy
-    Class['xinetd'] -> Class['haproxy']
-  }
 
   #-----------------------------------------------------------------------------
   # Environment
