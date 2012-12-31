@@ -22,6 +22,10 @@ class bootstrap {
     user_groups            => [],
   }
 
+  class { 'sudo':
+    permissions => $data::common::sudo_permissions,
+  }
+
   include users
 
   class { 'git':
@@ -49,7 +53,7 @@ class bootstrap {
   #---
 
   Class['global']
-  -> Class['iptables'] -> Class['ssh']
+  -> Class['iptables'] -> Class['ssh'] -> Class['sudo']
   -> Class['users'] -> Class['git']
   -> Class['ruby'] -> Class['puppet'] -> Class['hiera']
 
