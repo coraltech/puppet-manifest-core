@@ -42,7 +42,6 @@ class bootstrap {
     template_dir       => $data::common::puppet_template_dir,
     module_dirs        => $data::common::puppet_module_dirs,
     update_environment => $data::common::puppet_update_environment,
-    update_command     => $data::common::puppet_update_command,
   }
 
   class { 'hiera':
@@ -50,19 +49,11 @@ class bootstrap {
     hierarchy => $data::common::hiera_hierarchy,
   }
 
-  #---
-
-  Class['global']
-  -> Class['iptables'] -> Class['ssh'] -> Class['sudo']
-  -> Class['users'] -> Class['git']
-  -> Class['ruby'] -> Class['puppet'] -> Class['hiera']
-
   #-----------------------------------------------------------------------------
   # Environment
 
   if $::vagrant_exists {
     users::conf { $data::common::vagrant_user: }
-    Class['users'] -> Users::Conf[$data::common::vagrant_user]
   }
 
   #---
@@ -79,10 +70,4 @@ class bootstrap {
     base                 => 'false',
     post_update_commands => $data::common::base_post_update_commands,
   }
-
-  #---
-
-  Class['hiera']  # Last of the required systems
-  -> Git::Repo[$data::common::base_puppet_repo]
-  -> Git::Repo[$data::common::base_config_repo]
 }
