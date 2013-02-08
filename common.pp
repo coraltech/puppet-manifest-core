@@ -14,8 +14,9 @@ class data::common {
   #-----------------------------------------------------------------------------
 
   $global_facts                 = {
-    'environment'                => 'production',
-    'server_type'                => 'bootstrap',
+    'server_profile'             => 'generic',
+    'server_stage'               => 'bootstrap',
+    'server_type'                => 'core',
   }
 
   $vagrant_user                 = 'vagrant'
@@ -38,7 +39,7 @@ class data::common {
 
   $base_config_repo             = 'config.git'
   $base_config_dir              = "${git_home}/${base_config_repo}"
-  $base_config_address          = "git@${::hostname}:${base_config_repo}"
+  $base_config_address          = "git@${::fqdn}:${base_config_repo}"
 
   $hiera_common_config          = "${base_config_dir}/common.json"
   $hiera_backends               = [
@@ -52,11 +53,21 @@ class data::common {
     },
   ]
   $hiera_hierarchy              = [
-    '%{::hostname}',
-    '%{::location}',
-    '%{::environment}',
-    '%{::server_type}',
-    'common'
+    "profile/%{::server_profile}/%{::server_stage}",
+    "profile/%{::server_profile}",
+    "server/%{::server_environment}/%{::server_location}/%{::hostname}/%{::server_stage}",
+    "server/%{::server_environment}/%{::server_location}/%{::hostname}",
+    "server/%{::server_environment}/%{::hostname}/%{::server_stage}",
+    "server/%{::server_environment}/%{::hostname}",
+    "server/%{::hostname}/%{::server_stage}",
+    "server/%{::hostname}",
+    "location/%{::server_location}/%{::server_stage}",
+    "location/%{::server_location}",
+    "environment/%{::server_environment}/%{::server_stage}",
+    "environment/%{::server_environment}",
+    "stage/%{::server_stage}",
+    "type/%{::server_type}",
+    "common"
   ]
 
   $base_puppet_repo             = 'puppet.git'
@@ -76,4 +87,6 @@ class data::common {
     $puppet_update_environment,
     $puppet_update_command,
   ]
+
+  $base_classes = []
 }
