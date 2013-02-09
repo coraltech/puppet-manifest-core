@@ -14,7 +14,7 @@ class data::common {
   #-----------------------------------------------------------------------------
 
   $global_facts                 = {
-    'server_profile'             => 'generic',
+    'server_identity'            => 'test',
     'server_stage'               => 'bootstrap',
     'server_type'                => 'core',
   }
@@ -53,8 +53,8 @@ class data::common {
     },
   ]
   $hiera_hierarchy              = [
-    "profile/%{::server_profile}/%{::server_stage}",
-    "profile/%{::server_profile}",
+    "identity/%{::server_identity}/%{::server_stage}",
+    "identity/%{::server_identity}",
     "server/%{::server_environment}/%{::server_location}/%{::hostname}/%{::server_stage}",
     "server/%{::server_environment}/%{::server_location}/%{::hostname}",
     "server/%{::server_environment}/%{::hostname}/%{::server_stage}",
