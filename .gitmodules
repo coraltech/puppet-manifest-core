@@ -56,3 +56,6 @@
   path = modules/keepalived
   url = git://github.com/coraltech/puppet-keepalived.git
 
+[submodule "modules/preseed"]
+	path = modules/preseed
+	url = git://github.com/coraltech/puppet-preseed.git
