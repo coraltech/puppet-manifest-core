@@ -59,3 +59,6 @@
 [submodule "modules/sunjava"]
 	path = modules/sunjava
 	url = git://github.com/coraltech/puppet-sunjava.git
+[submodule "modules/apt"]
+	path = modules/apt
+	url = git://github.com/coraltech/puppet-apt2.git
