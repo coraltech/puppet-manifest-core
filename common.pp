@@ -35,7 +35,7 @@ class data::common {
   $git_home                     = $git::params::home
   $git_init_password            = $data::private::git_init_password
 
-  $ruby_gems                    = []
+  $ruby_gems                    = [ 'coral' ]
 
   $base_config_repo             = 'config.git'
   $base_config_dir              = "${git_home}/${base_config_repo}"

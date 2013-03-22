@@ -156,7 +156,7 @@
   "git_post_update_commands" : [],
   "ruby_ensure" : "present",
   "ruby_rubygems_ensure" : "present",
-  "ruby_gems" : [],
+  "ruby_gems" : [ "coral" ],
   "puppet_package_ensure" : "present",
   "puppet_service_ensure" : "stopped",
   "puppet_vim_puppet_ensure" : "present",
