@@ -39,9 +39,10 @@ class data::common {
 
   $base_config_repo             = 'config.git'
   $base_config_dir              = "${git_home}/${base_config_repo}"
-  $base_config_address          = "git@${::fqdn}:${base_config_repo}"
 
-  $hiera_common_config          = "${base_config_dir}/common.json"
+  $config_address               = "git@${::fqdn}:${base_config_repo}"
+  $common_config                = "${base_config_dir}/common.json"
+
   $hiera_backends               = [
     {
       'type'                     => 'json',
