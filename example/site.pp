@@ -14,12 +14,37 @@
  */
 node default {
 
+  Exec {
+    logoutput => "on_failure",
+  }
+
+  #---
+
   # This assumes the puppet-manifest-core has been added to the core directory.
   import "core/*.pp"
   include data::common
 
-  if ! ( config_initialized and exists(global_param('hiera_common_config')) ) {
-    $config_address = global_param('base_config_address')
+  #---
+
+  class { 'global':
+    facts => global_hash('global_facts')
+  }
+
+  #---
+
+  resources { "firewall":
+    purge => true
+  }
+  Firewall {
+    before  => Class['iptables::post_rules'],
+    require => Class['iptables::pre_rules'],
+  }
+  include iptables
+
+  #---
+
+  if ! ( config_initialized and exists(global_param('common_config')) ) {
+    $config_address = global_param('config_address')
 
     notice "Bootstrapping server"
     notice "Push configurations to: ${config_address}"
